@@ -118,9 +118,11 @@ export default async function handler(req, res) {
     transcript = String(t?.text ?? "").trim();
   } catch (e) {
     console.error(e);
-    return jsonError(res, 500, "文字起こしに失敗しました。", {
-      hint: "OPENAI_TRANSCRIBE_MODEL を whisper-1 に変更すると改善する場合があります。",
-    });
+    const detail = e?.message || e?.error?.message || String(e);
+    const hint = TRANSCRIBE_MODEL !== "whisper-1"
+      ? "OPENAI_TRANSCRIBE_MODEL=whisper-1 を試してください。"
+      : "APIキー・音声形式・ネットワークを確認してください。";
+    return jsonError(res, 500, "文字起こしに失敗しました。", { detail, hint });
   } finally {
     fs.promises.unlink(tmpPath).catch(() => {});
   }
