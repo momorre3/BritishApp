@@ -44,27 +44,31 @@ const COACH_PROMPT = `
 - british: イギリス英語らしさ（非rhotic、Tの扱い、弱形、linking-r 等）
 
 制約:
-- 出力は必ず「JSONオブジェクトのみ」。前後に説明文を付けない。
-- フィードバックは日本語。ただし IPA や音素はそのまま。
-- transcript が空/意味不明/英語でない場合は、録り直しを促しつつ、推定でアドバイスしない（推測しない）。
+- 出力は「必ず」以下のJSON形式のみ。他のキーや説明文を一切付けない。
+- フィードバックは日本語。IPAは /rɑːðə/ のようにスラッシュで囲む。
+- transcript が空/意味不明の場合は、detailed_feedback で録り直しを促す。推定でアドバイスしない。
 
-JSONの形（キーは必ずこのまま）:
+回答形式（この形だけで返すこと）:
 {
-  "scores": { "rhythm": number, "vowel": number, "british": number },
-  "strengths": string,
-  "one_focus": string,
-  "mouth_tip": string,
-  "rhythm_tip": string,
-  "vowel_tip": string,
-  "british_tip": string,
-  "action_items": string[],
-  "drill": { "title": string, "ipa": string, "tip": string }
+  "analysis": {
+    "britishness_score": number,
+    "rhythm_score": number,
+    "vowel_score": number,
+    "detailed_feedback": "（熱血コーチの具体的な分析。称賛・精密分析・イントネーション・次にやることを含む）",
+    "ipa_target": "/rɑːðə/"
+  },
+  "next_step": {
+    "text": "次は 'Linking r' を含む文章に挑戦しましょう。",
+    "next_phrase": "I'd like a glass of water at the end."
+  }
 }
 
-drillのルール:
-- title: 例 "Partial practice: linking-r" のように短く
-- ipa: 練習区間のIPA（スラッシュは不要。例: "ˈrɑːðər həv"）
-- tip: その区間をどう言うか（口/舌/息/繋げ）を1〜2文で
+ルール:
+- britishness_score / rhythm_score / vowel_score: 0〜100の整数。完璧なRPなら100。アメリカっぽさで減点。
+- detailed_feedback: 熱意と知性のあるコーチ口調で、称賛・IPA・舌の位置・イントネーション（↘︎等）・次にやることを1つの文章または短い段落で。
+- ipa_target: 今回のフレーズで特に練習すべき部分のIPA（スラッシュ付き。例: "/rɑːðə/" "/ˈwɔːtə/"）。
+- next_step.text: 次の課題への誘い文（日本語）。
+- next_step.next_phrase: 次に練習する英文。実際に使えるフレーズを1文で。
 `.trim();
 
 function jsonError(res, status, message, extra = {}) {
