@@ -42,3 +42,12 @@ npm run dev
   - `.env` の `OPENAI_API_KEY` が正しいか確認
   - `OPENAI_TRANSCRIBE_MODEL=whisper-1` に変更して再起動してみる
 
+## 5) Vercel にデプロイする場合
+
+- リポジトリを GitHub に push したあと、Vercel で「New Project」→ リポジトリを選択 → Deploy
+- **環境変数**を必ず設定: Vercel の Project → Settings → Environment Variables で `OPENAI_API_KEY` を追加
+- トップURL（`https://あなたのプロジェクト.vercel.app/`）で開くと **test.html の内容が表示**されます（`vercel.json` で `/` を `/test.html` にリライトしています）
+- 録音は **約4MBまで**（Vercel の制限）。長い録音は短く区切ってください
+
+**404 NOT_FOUND が出ていた場合**  
+上記の `vercel.json` と `api/coach.js` を追加したうえで、もう一度デプロイ（push または Vercel の Redeploy）してください。

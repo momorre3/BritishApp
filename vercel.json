@@ -1,0 +1,9 @@
+{
+  "rewrites": [{ "source": "/", "destination": "/test.html" }],
+  "functions": {
+    "api/coach.js": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  }
+}
