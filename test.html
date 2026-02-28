@@ -260,6 +260,7 @@
                 try {
                     const errBody = JSON.parse(rawText);
                     if (errBody.error) msg = errBody.error;
+                    if (errBody.detail) msg += ' 【詳細】' + errBody.detail;
                     if (errBody.hint) msg += ' ' + errBody.hint;
                 } catch (_) {}
                 throw new Error(`[${res.status}] ${msg || res.statusText}`);
