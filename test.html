@@ -3,397 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>British English Coach — 専属発音コーチ</title>
+    <title>British English Coach — 専属RP発音コーチ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
-        .font-serif-title { font-family: 'Cormorant Garamond', serif; }
-        .recording-glow { animation: pulse 1.5s infinite; }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(30, 58, 95, 0.5); }
-            70% { box-shadow: 0 0 0 14px rgba(30, 58, 95, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(30, 58, 95, 0); }
+        :root {
+            --oxford-blue: #002147;
+            --racing-green: #004225;
+            --british-red: #B22234;
         }
-        .gauge-bar { transition: width 0.5s ease-out; }
-        .coach-card { border-left: 4px solid #1e3a5f; }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
+        .font-serif-title { font-family: 'Cormorant Garamond', serif; }
+        
+        /* 録音中のアニメーション */
+        .recording-glow { animation: pulse 1.5s infinite; background-color: var(--british-red) !important; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(178, 34, 52, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(178, 34, 52, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(178, 34, 52, 0); }
+        }
+
+        .gauge-bar { transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .coach-card { border-left: 4px solid var(--oxford-blue); }
+        .btn-primary { background-color: var(--oxford-blue); transition: all 0.2s; }
+        .btn-primary:hover { background-color: #003366; transform: translateY(-1px); }
     </style>
 </head>
 <body class="min-h-screen text-slate-800 antialiased">
-    <div class="max-w-lg mx-auto bg-white min-h-screen shadow-lg">
-        <!-- Header: British Navy -->
-        <header class="bg-[#1e3a5f] text-white px-6 py-5">
-            <h1 class="font-serif-title text-2xl font-semibold tracking-tight">British English Coach</h1>
-            <p class="text-sm text-white/80 mt-1">あなた専属のRP発音コーチ</p>
+    <div class="max-w-lg mx-auto bg-white min-h-screen shadow-2xl border-x border-slate-200">
+        <header class="bg-[#002147] text-white px-8 py-7 shadow-md">
+            <h1 class="font-serif-title text-3xl font-bold tracking-tight">British English Coach</h1>
+            <p class="text-xs text-blue-200 mt-1 uppercase tracking-[0.2em] font-medium">Professional RP Coaching</p>
         </header>
 
-        <main class="p-6 pb-10">
-            <!-- Target Phrase -->
-            <section class="mb-6">
-                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Target Phrase</p>
-                <p id="targetPhrase" class="text-xl font-medium text-slate-800 leading-snug bg-slate-50 border border-slate-200 rounded-xl p-4">
-                    Actually, I'd rather have a cup of <span class="bg-amber-100 text-amber-900 px-1 border-b-2 border-amber-400">tea</span>, if you don't mind.
+        <main class="p-6 pb-12">
+            <section class="mb-8">
+                <div class="flex justify-between items-end mb-2">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Target Phrase</p>
+                    <p class="text-[10px] font-medium text-slate-400">Step <span id="phraseStep" class="text-oxford-blue font-bold">1</span> of <span id="phraseTotal">5</span></p>
+                </div>
+                <div class="relative">
+                    <p id="targetPhrase" class="text-xl font-semibold text-slate-800 leading-relaxed bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
+                        </p>
+                </div>
+            </section>
+
+            <section class="mb-8 bg-blue-50/50 border border-blue-100 rounded-2xl p-5">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <p class="text-[10px] font-bold text-blue-900 uppercase tracking-widest">Visual Feedback</p>
+                </div>
+                <div id="coachVisual" class="space-y-3">
+                    <div class="flex items-baseline gap-3">
+                        <p id="drillIpa" class="text-2xl font-bold text-[#002147] font-mono tracking-tight">/ — /</p>
+                        <p id="drillTitle" class="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded italic">Target Sound</p>
+                    </div>
+                    <p id="drillTip" class="text-sm text-slate-600 leading-relaxed">
+                        録音を開始してください。イギリス英語特有の母音やリズムを分析します。
+                    </p>
+                </div>
+            </section>
+
+            <section class="flex flex-col items-center gap-5 mb-10">
+                <div class="relative">
+                    <button id="recordBtn" type="button" class="w-24 h-24 rounded-full btn-primary text-white flex items-center justify-center shadow-xl active:scale-90 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                    </button>
+                </div>
+                <p id="statusText" class="text-sm font-medium text-slate-500 tracking-wide text-center">
+                    押している間だけ録音 / 離すと分析開始
                 </p>
-                <p class="text-xs text-slate-400 mt-1">Step <span id="phraseStep">1</span> of <span id="phraseTotal">5</span></p>
             </section>
 
-            <!-- Coach Visual Advice (replaces waveform) -->
-            <section class="mb-6 bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <p class="text-xs font-semibold text-[#1e3a5f] uppercase tracking-wider mb-2">コーチの視覚的アドバイス</p>
-                <div id="coachVisual" class="space-y-2 min-h-[4rem]">
-                    <p id="drillTitle" class="text-sm font-semibold text-slate-700">—</p>
-                    <p id="drillIpa" class="text-lg font-medium text-[#1e3a5f] font-mono">/ — /</p>
-                    <p id="drillTip" class="text-sm text-slate-600 leading-relaxed">録音して分析すると、イントネーション（↘︎↗︎）や口の形のアドバイスがここに表示されます。</p>
-                </div>
-            </section>
-
-            <!-- Record Button -->
-            <section class="flex flex-col items-center gap-4 mb-8">
-                <button id="recordBtn" type="button" class="w-20 h-20 rounded-full bg-[#1e3a5f] text-white flex items-center justify-center shadow-lg hover:bg-[#2d4a6f] active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                    </svg>
-                </button>
-                <p id="statusText" class="text-sm text-slate-500">押している間だけ録音／離すと分析開始</p>
-            </section>
-
-            <!-- Scores: Progress bars -->
-            <section class="grid grid-cols-3 gap-3 mb-6">
-                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Rhythm</p>
-                    <div class="h-2 bg-slate-200 rounded-full overflow-hidden mb-1">
-                        <div id="rhythmBar" class="gauge-bar h-full bg-[#1e3a5f] rounded-full" style="width: 0%"></div>
+            <section class="grid grid-cols-3 gap-4 mb-8">
+                <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                    <p class="text-[9px] font-black text-slate-400 uppercase mb-2 tracking-tighter">Rhythm</p>
+                    <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2">
+                        <div id="rhythmBar" class="gauge-bar h-full bg-[#002147]" style="width: 0%"></div>
                     </div>
-                    <p id="rhythmScore" class="text-sm font-bold text-slate-800">—</p>
+                    <p id="rhythmScore" class="text-lg font-bold text-slate-800">—</p>
                 </div>
-                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Vowel</p>
-                    <div class="h-2 bg-slate-200 rounded-full overflow-hidden mb-1">
-                        <div id="vowelBar" class="gauge-bar h-full bg-[#1e3a5f] rounded-full" style="width: 0%"></div>
+                <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                    <p class="text-[9px] font-black text-slate-400 uppercase mb-2 tracking-tighter">Vowel</p>
+                    <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2">
+                        <div id="vowelBar" class="gauge-bar h-full bg-[#002147]" style="width: 0%"></div>
                     </div>
-                    <p id="vowelScore" class="text-sm font-bold text-slate-800">—</p>
+                    <p id="vowelScore" class="text-lg font-bold text-slate-800">—</p>
                 </div>
-                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Britishness</p>
-                    <div class="h-2 bg-slate-200 rounded-full overflow-hidden mb-1">
-                        <div id="britishBar" class="gauge-bar h-full bg-emerald-600 rounded-full" style="width: 0%"></div>
+                <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                    <p class="text-[9px] font-black text-slate-400 uppercase mb-2 tracking-tighter">Britishness</p>
+                    <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2">
+                        <div id="britishBar" class="gauge-bar h-full bg-[#004225]" style="width: 0%"></div>
                     </div>
-                    <p id="britishScore" class="text-sm font-bold text-slate-800">—</p>
+                    <p id="britishScore" class="text-lg font-bold text-emerald-700">—</p>
                 </div>
             </section>
 
-            <!-- Your Transcript (with highlight support) -->
-            <section class="mb-6">
-                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Your Transcript</p>
-                <div id="transcriptText" class="text-sm text-slate-700 bg-white border border-slate-200 rounded-xl p-4 min-h-[3.5rem] leading-relaxed">
-                    （ここに文字起こしが表示されます。コーチが指摘した箇所はハイライトされます）
+            <section class="mb-8">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Your Transcript</p>
+                <div id="transcriptText" class="text-sm text-slate-600 bg-slate-50/50 border border-slate-200 rounded-xl p-4 min-h-[3rem] italic">
+                    ...
                 </div>
             </section>
 
-            <!-- Structured Coach Feedback (4 sections) -->
-            <section class="mb-6">
-                <p class="text-xs font-semibold text-[#1e3a5f] uppercase tracking-wider mb-3">Coach Feedback</p>
-                <div id="feedbackText" class="space-y-4">
-                    <p class="text-slate-500 text-sm">録音して分析すると、4つのフィードバックがここに表示されます。</p>
+            <section class="mb-10">
+                <p class="text-[10px] font-bold text-[#002147] uppercase tracking-widest mb-3">Coach's Professional Feedback</p>
+                <div id="feedbackText" class="coach-card bg-slate-50 rounded-r-2xl p-5 shadow-inner">
+                    <p class="text-slate-400 text-sm italic">録音を待機中...</p>
                 </div>
             </section>
 
-            <!-- Next Step Button -->
-            <section class="pt-2 space-y-2">
-                <p id="nextStepHint" class="text-xs text-slate-500 hidden"></p>
-                <button id="nextStepBtn" type="button" class="w-full py-3 px-4 rounded-xl bg-[#1e3a5f] text-white font-semibold text-sm hover:bg-[#2d4a6f] active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/50 hidden">
-                    次の課題に進む
+            <section id="nextStepArea" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-4">
+                    <p class="text-[10px] font-bold text-emerald-800 uppercase mb-1">Coach's Suggestion</p>
+                    <p id="nextStepHint" class="text-xs text-emerald-700 font-medium"></p>
+                </div>
+                <button id="nextStepBtn" type="button" class="w-full py-4 px-6 rounded-2xl bg-[#002147] text-white font-bold text-sm shadow-lg hover:shadow-xl active:scale-95 transition-all">
+                    Next Challenge: 次の課題へ
                 </button>
             </section>
         </main>
     </div>
 
     <script>
+        // --- 1. 定数と例文データ (British English) ---
+        const BRITISH_PHRASES = [
+            { 
+                text: "Actually, I'd rather have a cup of tea in the garden, if you don't mind.", 
+                focus: "rather/tea", 
+                hint: "母音 /ɑː/ を喉の奥で深く響かせましょう。" 
+            },
+            { 
+                text: "The theatre in the city centre was cancelled due to the rain.", 
+                focus: "theatre/centre", 
+                hint: "-re の綴りと、rを巻かない発音を意識して。" 
+            },
+            { 
+                text: "Mind the gap between the train and the platform at Victoria Station.", 
+                focus: "gap/platform", 
+                hint: "ロンドン地下鉄の象徴的なフレーズです。Tを明瞭に。" 
+            },
+            { 
+                text: "I fancy a bit of a natter over some biscuits and a cuppa.", 
+                focus: "fancy/biscuits", 
+                hint: "イギリス特有の表現です。リズムを弾ませて。" 
+            },
+            { 
+                text: "It's quite a long way to the flat, but the lift is working.", 
+                focus: "quite/flat", 
+                hint: "quite /aɪ/ と flat /æ/ の違いをはっきりと。" 
+            }
+        ];
+
+        let phraseIndex = 0;
+        let isRecording = false;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+
+        // UI要素
         const recordBtn = document.getElementById('recordBtn');
         const statusText = document.getElementById('statusText');
         const transcriptText = document.getElementById('transcriptText');
         const feedbackText = document.getElementById('feedbackText');
-        const rhythmScoreEl = document.getElementById('rhythmScore');
-        const vowelScoreEl = document.getElementById('vowelScore');
-        const britishScoreEl = document.getElementById('britishScore');
-        const rhythmBar = document.getElementById('rhythmBar');
-        const vowelBar = document.getElementById('vowelBar');
-        const britishBar = document.getElementById('britishBar');
         const targetPhraseEl = document.getElementById('targetPhrase');
-        const drillTitleEl = document.getElementById('drillTitle');
-        const drillIpaEl = document.getElementById('drillIpa');
-        const drillTipEl = document.getElementById('drillTip');
-        const phraseStepEl = document.getElementById('phraseStep');
-        const phraseTotalEl = document.getElementById('phraseTotal');
+        const nextStepArea = document.getElementById('nextStepArea');
         const nextStepBtn = document.getElementById('nextStepBtn');
 
-        const PHRASES = [
-            "Actually, I'd rather have a cup of tea, if you don't mind.",
-            "I can't dance in the bath—the floor's too slippery.",
-            "The water's better here than in London.",
-            "She asked for a fast answer about the project.",
-            "We'd rather not talk about the weather."
-        ];
-        let phraseIndex = 0;
-        let lastNextStep = null;
-
-        let mediaRecorder = null;
-        let recordedChunks = [];
-        let currentStream = null;
-        let isRecording = false;
-        let stopRequested = false;
-
-        function isTouchDevice() {
-            return 'ontouchstart' in window || (navigator.maxTouchPoints || 0) > 0 || (navigator.msMaxTouchPoints || 0) > 0;
-        }
-
-        function pickBestMimeType() {
-            const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/ogg'];
-            for (const t of candidates) {
-                if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) return t;
-            }
-            return '';
-        }
-
-        function setBusyUI(message) {
-            statusText.textContent = message;
-            recordBtn.disabled = true;
-            recordBtn.classList.add('opacity-60');
-        }
-
-        function clearBusyUI(message) {
-            statusText.textContent = message;
-            recordBtn.disabled = false;
-            recordBtn.classList.remove('opacity-60');
-        }
-
-        function setRecordingUI(on) {
-            if (on) {
-                recordBtn.classList.add('recording-glow');
-                statusText.classList.remove('animate-pulse');
-                statusText.textContent = '録音中…（離すと停止）';
+        // --- 2. 初期化 ---
+        function init() {
+            setPhrase(0);
+            if (isTouchDevice()) {
+                statusText.textContent = "タップで録音 / もう一度押して分析";
+                recordBtn.onclick = toggleRecording;
             } else {
-                recordBtn.classList.remove('recording-glow');
-                statusText.classList.add('animate-pulse');
+                recordBtn.onpointerdown = startRecording;
+                recordBtn.onpointerup = stopRecording;
+                recordBtn.onpointerleave = (e) => { if(isRecording) stopRecording(); };
             }
         }
 
-        function clampScore(n) {
-            const x = Number(n);
-            if (!Number.isFinite(x)) return null;
-            return Math.max(0, Math.min(100, Math.round(x)));
+        function setPhrase(index) {
+            phraseIndex = index % BRITISH_PHRASES.length;
+            const item = BRITISH_PHRASES[phraseIndex];
+            
+            document.getElementById('phraseStep').textContent = phraseIndex + 1;
+            document.getElementById('phraseTotal').textContent = BRITISH_PHRASES.length;
+            
+            // 重要ワードのハイライト
+            let html = item.text;
+            const keywords = ["tea", "theatre", "centre", "garden", "rather", "gap", "fancy", "flat", "lift"];
+            keywords.forEach(word => {
+                const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                html = html.replace(regex, `<span class="bg-amber-100 text-amber-900 px-1 border-b-2 border-amber-400">$&</span>`);
+            });
+            targetPhraseEl.innerHTML = html;
+            
+            // 状態リセット
+            nextStepArea.classList.add('hidden');
+            document.getElementById('drillIpa').textContent = "/ — /";
+            document.getElementById('drillTip').textContent = item.hint;
         }
 
-        function updateScores(r, v, b) {
-            const set = (el, bar, val) => {
-                if (val == null) return;
-                el.textContent = val + '%';
-                if (bar) bar.style.width = val + '%';
-            };
-            set(rhythmScoreEl, rhythmBar, r);
-            set(vowelScoreEl, vowelBar, v);
-            set(britishScoreEl, britishBar, b);
-        }
-
-        function renderTranscript(transcript) {
-            if (!transcript) {
-                transcriptText.innerHTML = '（文字起こし結果なし）';
-                return;
-            }
-            transcriptText.textContent = transcript;
-        }
-
-        function renderStructuredFeedback(data) {
-            const analysis = data?.analysis || {};
-            const detailed = analysis.detailed_feedback || '';
-            const nextStep = data?.next_step || {};
-            lastNextStep = nextStep.text || nextStep.next_phrase ? nextStep : null;
-
-            feedbackText.innerHTML = detailed
-                ? `<div class="coach-card bg-slate-50 rounded-r-lg p-4"><p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">${escapeHtml(detailed)}</p></div>`
-                : '<p class="text-slate-500 text-sm">（フィードバックを生成できませんでした）</p>';
-
-            nextStepBtn.textContent = '次の課題に進む';
-            const hintEl = document.getElementById('nextStepHint');
-            if (hintEl) {
-                hintEl.textContent = nextStep.text || '';
-                hintEl.classList.toggle('hidden', !nextStep.text);
-            }
-            nextStepBtn.classList.remove('hidden');
-        }
-
-        function escapeHtml(s) {
-            const div = document.createElement('div');
-            div.textContent = s;
-            return div.innerHTML;
-        }
-
-        function renderCoachVisual(ipaTarget) {
-            drillTitleEl.textContent = '今回のIPAターゲット';
-            drillIpaEl.textContent = ipaTarget && ipaTarget.trim() ? ipaTarget.trim() : '/ — /';
-            drillTipEl.textContent = '録音して分析すると、イントネーション（↘︎↗︎）や口の形のアドバイスがここに表示されます。';
-        }
-
-        function setPhraseIndex(index) {
-            phraseIndex = index % PHRASES.length;
-            phraseStepEl.textContent = phraseIndex + 1;
-            phraseTotalEl.textContent = PHRASES.length;
-            targetPhraseEl.innerHTML = highlightPhrase(PHRASES[phraseIndex]);
-        }
-
-        function setTargetPhrase(phrase) {
-            if (!phrase || !phrase.trim()) return;
-            const idx = PHRASES.indexOf(phrase.trim());
-            if (idx >= 0) phraseIndex = idx;
-            else PHRASES.push(phrase.trim());
-            phraseStepEl.textContent = phraseIndex + 1;
-            phraseTotalEl.textContent = PHRASES.length;
-            targetPhraseEl.innerHTML = highlightPhrase(phrase.trim());
-        }
-
-        function highlightPhrase(text) {
-            return text.replace(/\b(tea|dance|bath|water|better|fast|rather|can't)\b/gi, '<span class="bg-amber-100 text-amber-900 px-1 border-b-2 border-amber-400">$&</span>');
-        }
-
-        function nextPhrase() {
-            if (lastNextStep && lastNextStep.next_phrase) {
-                setTargetPhrase(lastNextStep.next_phrase);
-                lastNextStep = null;
-            } else {
-                setPhraseIndex(phraseIndex + 1);
-            }
-            const hintEl = document.getElementById('nextStepHint');
-            if (hintEl) hintEl.classList.add('hidden');
-            nextStepBtn.classList.add('hidden');
-            clearBusyUI(isTouchDevice() ? 'タップで録音開始／もう一度タップで停止' : '押している間だけ録音／離すと分析開始');
-        }
-
+        // --- 3. 録音ロジック ---
         async function startRecording() {
             if (isRecording) return;
-            isRecording = true;
-            stopRequested = false;
-            recordedChunks = [];
-
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                currentStream = stream;
-                const mimeType = pickBestMimeType();
-                mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
-
-                mediaRecorder.ondataavailable = (e) => {
-                    if (e.data && e.data.size > 0) recordedChunks.push(e.data);
-                };
-
-                mediaRecorder.onstop = async () => {
-                    setRecordingUI(false);
-                    setBusyUI('分析中…（数秒かかることがあります）');
-                    try {
-                        const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-                        await sendAudioForCoaching(blob);
-                        clearBusyUI(isTouchDevice() ? 'タップで録音／もう一度で停止' : '完了。もう一度押して録音できます。');
-                    } catch (err) {
-                        console.error(err);
-                        const msg = (err && err.message) ? err.message : '分析に失敗しました（サーバー起動/APIキーを確認）';
-                        clearBusyUI('エラー：' + msg);
-                    } finally {
-                        try { currentStream?.getTracks()?.forEach(t => t.stop()); } catch (_) {}
-                        currentStream = null;
-                        mediaRecorder = null;
-                        recordedChunks = [];
-                        isRecording = false;
-                    }
-                };
-
+                mediaRecorder = new MediaRecorder(stream);
+                recordedChunks = [];
+                
+                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                mediaRecorder.onstop = processRecording;
+                
                 mediaRecorder.start();
-                setRecordingUI(true);
-                if (stopRequested) stopRecording();
+                isRecording = true;
+                recordBtn.classList.add('recording-glow');
+                statusText.textContent = "録音中...（離すと停止）";
+                statusText.classList.add('text-red-600');
             } catch (err) {
-                console.error(err);
-                isRecording = false;
-                clearBusyUI('マイク権限が必要です。ブラウザの許可を確認してください。');
+                alert("マイクの使用を許可してください。");
             }
         }
 
         function stopRecording() {
             if (!isRecording) return;
-            if (!mediaRecorder) { stopRequested = true; return; }
+            mediaRecorder.stop();
+            isRecording = false;
+            recordBtn.classList.remove('recording-glow');
+            statusText.textContent = "分析中...";
+            statusText.classList.remove('text-red-600');
+        }
+
+        function toggleRecording() {
+            isRecording ? stopRecording() : startRecording();
+        }
+
+        // --- 4. API通信とUI反映 ---
+        async function processRecording() {
+            const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+            const formData = new FormData();
+            formData.append('audio', blob);
+            formData.append('targetPhrase', targetPhraseEl.innerText);
+
             try {
-                if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+                const response = await fetch('/api/coach', { method: 'POST', body: formData });
+                const data = await response.json();
+                updateUI(data);
             } catch (err) {
-                console.error(err);
-                isRecording = false;
-                clearBusyUI('エラー：録音停止に失敗しました');
+                feedbackText.innerHTML = `<p class="text-red-500 text-xs">エラーが発生しました: ${err.message}</p>`;
             }
         }
 
-        async function sendAudioForCoaching(audioBlob) {
-            const targetPhrase = (targetPhraseEl?.innerText || '').trim();
-            transcriptText.innerHTML = '（文字起こし中…）';
+        function updateUI(data) {
+            const analysis = data.analysis || {};
+            
+            // スコアとバー
+            const updateScore = (id, barId, val) => {
+                const score = Math.round(val || 0);
+                document.getElementById(id).textContent = score + "%";
+                document.getElementById(barId).style.width = score + "%";
+            };
+            updateScore('rhythmScore', 'rhythmBar', analysis.rhythm_score);
+            updateScore('vowelScore', 'vowelBar', analysis.vowel_score);
+            updateScore('britishScore', 'britishBar', analysis.britishness_score);
 
-            const fd = new FormData();
-            const ext = (audioBlob.type || '').includes('ogg') ? 'ogg' : 'webm';
-            fd.append('audio', audioBlob, `recording.${ext}`);
-            fd.append('targetPhrase', targetPhrase);
+            // テキスト関連
+            transcriptText.textContent = data.transcript || "聞き取れませんでした";
+            
+            document.getElementById('drillIpa').textContent = analysis.ipa_target || "/ — /";
+            
+            feedbackText.innerHTML = `<p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">${analysis.detailed_feedback || "フィードバックを取得できませんでした。"}</p>`;
 
-            const res = await fetch('/api/coach', { method: 'POST', body: fd });
-            const rawText = await res.text().catch(() => '');
-            if (!res.ok) {
-                let msg = rawText;
-                try {
-                    const errBody = JSON.parse(rawText);
-                    if (errBody.error) msg = errBody.error;
-                    if (errBody.detail) msg += ' 【詳細】' + errBody.detail;
-                    if (errBody.hint) msg += ' ' + errBody.hint;
-                } catch (_) {}
-                throw new Error(`[${res.status}] ${msg || res.statusText}`);
-            }
-
-            const data = JSON.parse(rawText);
-            renderTranscript(data.transcript);
-
-            const a = data?.analysis || {};
-            updateScores(clampScore(a.rhythm_score), clampScore(a.vowel_score), clampScore(a.britishness_score));
-
-            renderStructuredFeedback(data);
-            renderCoachVisual(a.ipa_target);
-        }
-
-        function bindTapToToggle(el) {
-            el.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (!isRecording) startRecording();
-                else stopRecording();
-            });
-        }
-
-        function bindHoldToRecord(el) {
-            el.addEventListener('pointerdown', (e) => {
-                e.preventDefault();
-                el.setPointerCapture?.(e.pointerId);
-                startRecording();
-            });
-            el.addEventListener('pointerup', (e) => { e.preventDefault(); stopRecording(); });
-            el.addEventListener('pointercancel', stopRecording);
-            el.addEventListener('pointerleave', (e) => { if (e.buttons) stopRecording(); });
-            el.addEventListener('contextmenu', (e) => e.preventDefault());
-        }
-
-        nextStepBtn.addEventListener('click', nextPhrase);
-        setPhraseIndex(0);
-
-        if (!navigator.mediaDevices?.getUserMedia) {
-            statusText.textContent = 'このブラウザは録音に対応していません（Chrome推奨）';
-            recordBtn.disabled = true;
-            recordBtn.classList.add('opacity-60');
-        } else {
-            if (isTouchDevice()) {
-                statusText.textContent = 'タップで録音開始／もう一度タップで停止';
-                bindTapToToggle(recordBtn);
-            } else {
-                bindHoldToRecord(recordBtn);
+            // 次のステップ
+            if (data.next_step) {
+                document.getElementById('nextStepHint').textContent = data.next_step.text || "素晴らしい！次の課題に進みましょう。";
+                nextStepArea.classList.remove('hidden');
             }
         }
+
+        // --- 5. ユーティリティ ---
+        function isTouchDevice() {
+            return (('ontouchstart' in window) || (navigator.maxTouchPoints > 0));
+        }
+
+        nextStepBtn.onclick = () => setPhrase(phraseIndex + 1);
+
+        init();
     </script>
 </body>
 </html>
