@@ -208,7 +208,8 @@
                         clearBusyUI('完了。もう一度押して録音できます。');
                     } catch (err) {
                         console.error(err);
-                        clearBusyUI('エラー：分析に失敗しました（サーバー起動/APIキーを確認）');
+                        const msg = (err && err.message) ? err.message : '分析に失敗しました（サーバー起動/APIキーを確認）';
+                        clearBusyUI('エラー：' + msg);
                     } finally {
                         try { currentStream?.getTracks()?.forEach(t => t.stop()); } catch (_) {}
                         currentStream = null;
@@ -253,12 +254,18 @@
             fd.append('targetPhrase', targetPhrase);
 
             const res = await fetch('/api/coach', { method: 'POST', body: fd });
+            const rawText = await res.text().catch(() => '');
             if (!res.ok) {
-                const text = await res.text().catch(() => '');
-                throw new Error(`coach api failed: ${res.status} ${text}`);
+                let msg = rawText;
+                try {
+                    const errBody = JSON.parse(rawText);
+                    if (errBody.error) msg = errBody.error;
+                    if (errBody.hint) msg += ' ' + errBody.hint;
+                } catch (_) {}
+                throw new Error(`[${res.status}] ${msg || res.statusText}`);
             }
 
-            const data = await res.json();
+            const data = JSON.parse(rawText);
             transcriptText.textContent = data.transcript || '（文字起こし結果なし）';
 
             const scores = data?.scores || {};
