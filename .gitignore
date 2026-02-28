@@ -1,0 +1,9 @@
+# 依存パッケージ
+node_modules/
+
+# 環境変数（APIキーなど）
+.env
+
+# ログ
+npm-debug.log*
+

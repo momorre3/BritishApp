@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The British Beat - Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+        .recording-glow { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+        <div class="bg-slate-900 p-6 text-white flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-tight">The British Beat</h1>
+            <span class="text-xs bg-red-600 px-2 py-1 rounded-full uppercase tracking-widest">Live Mode</span>
+        </div>
+
+        <div class="p-8">
+            <div class="mb-8">
+                <p class="text-sm text-gray-500 mb-2 uppercase tracking-wide font-semibold">Target Phrase</p>
+                <p id="targetPhrase" class="text-2xl font-medium text-slate-800 leading-snug">
+                    Actually, I'd rather have a cup of <span class="bg-yellow-100 text-yellow-800 px-1 border-b-2 border-yellow-400">tea</span>, if you don't mind.
+                </p>
+            </div>
+
+            <div class="h-24 bg-slate-50 rounded-xl mb-8 flex items-center justify-center border border-dashed border-gray-300">
+                <div class="flex items-end space-x-1 h-12">
+                    <div class="w-1 bg-slate-300 h-4 rounded-full"></div>
+                    <div class="w-1 bg-slate-400 h-8 rounded-full"></div>
+                    <div class="w-1 bg-slate-600 h-12 rounded-full"></div>
+                    <div class="w-1 bg-slate-400 h-6 rounded-full"></div>
+                    <div class="w-1 bg-slate-300 h-10 rounded-full"></div>
+                </div>
+                <p class="absolute text-[10px] text-gray-400 mt-16 font-mono">PITCH ANALYSIS WAVEFORM</p>
+            </div>
+
+            <div class="bg-indigo-50 p-4 rounded-2xl mb-8 border border-indigo-100">
+                <p id="drillTitle" class="text-xs text-indigo-600 font-bold uppercase mb-1">Focus Drill</p>
+                <p id="drillIpa" class="text-lg font-bold text-indigo-900">/ -- /</p>
+                <p id="drillTip" class="text-xs text-indigo-700 mt-1">録音して分析すると、ここに練習ポイントが表示されます。</p>
+            </div>
+
+            <div class="flex flex-col items-center space-y-6">
+                <button id="recordBtn" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-white shadow-lg active:scale-95 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                </button>
+                <p id="statusText" class="text-sm text-gray-400 animate-pulse font-medium">押している間だけ録音します（離すと分析が始まります）</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-0.5 bg-gray-100 border-t border-gray-100">
+            <div class="bg-white p-4 text-center">
+                <p class="text-[10px] text-gray-400 uppercase font-bold">Rhythm</p>
+                <p id="rhythmScore" class="text-xl font-bold text-slate-800">--%</p>
+            </div>
+            <div class="bg-white p-4 text-center border-x border-gray-100">
+                <p class="text-[10px] text-gray-400 uppercase font-bold">Vowel</p>
+                <p id="vowelScore" class="text-xl font-bold text-slate-800">--%</p>
+            </div>
+            <div class="bg-white p-4 text-center">
+                <p class="text-[10px] text-gray-400 uppercase font-bold">British</p>
+                <p id="britishScore" class="text-xl font-bold text-green-600">--%</p>
+            </div>
+        </div>
+
+        <div class="p-6 bg-white border-t border-gray-100 space-y-4">
+            <div>
+                <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Your transcript</p>
+                <p id="transcriptText" class="text-sm text-slate-800 bg-slate-50 border border-slate-100 rounded-xl p-3 min-h-[44px]">（ここに文字起こしが表示されます）</p>
+            </div>
+            <div>
+                <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Coach feedback</p>
+                <div id="feedbackText" class="text-sm text-slate-800 bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-2">
+                    <p class="text-gray-500">（ここにフィードバックが表示されます）</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const recordBtn = document.getElementById('recordBtn');
+        const statusText = document.getElementById('statusText');
+        const transcriptText = document.getElementById('transcriptText');
+        const feedbackText = document.getElementById('feedbackText');
+        const rhythmScoreEl = document.getElementById('rhythmScore');
+        const vowelScoreEl = document.getElementById('vowelScore');
+        const britishScoreEl = document.getElementById('britishScore');
+        const targetPhraseEl = document.getElementById('targetPhrase');
+        const drillTitleEl = document.getElementById('drillTitle');
+        const drillIpaEl = document.getElementById('drillIpa');
+        const drillTipEl = document.getElementById('drillTip');
+
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let currentStream = null;
+        let isRecording = false;
+        let stopRequested = false;
+
+        function isTouchDevice() {
+            return (
+                'ontouchstart' in window ||
+                (navigator.maxTouchPoints || 0) > 0 ||
+                (navigator.msMaxTouchPoints || 0) > 0
+            );
+        }
+
+        function pickBestMimeType() {
+            const candidates = [
+                'audio/webm;codecs=opus',
+                'audio/webm',
+                'audio/ogg;codecs=opus',
+                'audio/ogg'
+            ];
+            for (const t of candidates) {
+                if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) return t;
+            }
+            return '';
+        }
+
+        function setBusyUI(message) {
+            statusText.textContent = message;
+            recordBtn.disabled = true;
+            recordBtn.classList.add('opacity-60');
+        }
+
+        function clearBusyUI(message) {
+            statusText.textContent = message;
+            recordBtn.disabled = false;
+            recordBtn.classList.remove('opacity-60');
+        }
+
+        function setRecordingUI(on) {
+            if (on) {
+                recordBtn.classList.add('recording-glow');
+                statusText.classList.remove('animate-pulse');
+                statusText.textContent = '録音中…（離すと停止）';
+            } else {
+                recordBtn.classList.remove('recording-glow');
+                statusText.classList.add('animate-pulse');
+            }
+        }
+
+        function clampScore(n) {
+            const x = Number(n);
+            if (!Number.isFinite(x)) return null;
+            return Math.max(0, Math.min(100, Math.round(x)));
+        }
+
+        function renderFeedback(analysis) {
+            const lines = [];
+            const add = (title, body) => {
+                if (!body) return;
+                lines.push(`<div><p class="font-semibold text-slate-900">${title}</p><p class="text-slate-700">${body}</p></div>`);
+            };
+
+            add('まず良かった点', analysis?.strengths);
+            add('改善ポイント（1つに絞る）', analysis?.one_focus);
+            add('口の形・舌の位置', analysis?.mouth_tip);
+            add('リズム/強弱', analysis?.rhythm_tip);
+            add('母音', analysis?.vowel_tip);
+            add('イギリス英語らしさ', analysis?.british_tip);
+
+            const bullets = Array.isArray(analysis?.action_items) ? analysis.action_items : [];
+            if (bullets.length) {
+                lines.push(`<div><p class="font-semibold text-slate-900">次にやること</p><ul class="list-disc pl-5 text-slate-700">${bullets.map(x => `<li>${String(x)}</li>`).join('')}</ul></div>`);
+            }
+
+            feedbackText.innerHTML = lines.length ? lines.join('') : `<p class="text-gray-500">（フィードバックを生成できませんでした）</p>`;
+        }
+
+        function renderDrill(drill) {
+            const title = drill?.title || 'Focus Drill';
+            const ipa = drill?.ipa ? `/ ${drill.ipa} /` : '/ -- /';
+            const tip = drill?.tip || '練習ポイントがありませんでした。別のフレーズでも試してみてください。';
+            drillTitleEl.textContent = title;
+            drillIpaEl.textContent = ipa;
+            drillTipEl.textContent = tip;
+        }
+
+        async function startRecording() {
+            if (isRecording) return;
+            isRecording = true;
+            stopRequested = false;
+            recordedChunks = [];
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                currentStream = stream;
+                const mimeType = pickBestMimeType();
+                mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    setRecordingUI(false);
+                    setBusyUI('分析中…（数秒かかることがあります）');
+                    try {
+                        const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                        await sendAudioForCoaching(blob);
+                        clearBusyUI('完了。もう一度押して録音できます。');
+                    } catch (err) {
+                        console.error(err);
+                        clearBusyUI('エラー：分析に失敗しました（サーバー起動/APIキーを確認）');
+                    } finally {
+                        try { currentStream?.getTracks()?.forEach(t => t.stop()); } catch (_) {}
+                        currentStream = null;
+                        mediaRecorder = null;
+                        recordedChunks = [];
+                        isRecording = false;
+                    }
+                };
+
+                mediaRecorder.start();
+                setRecordingUI(true);
+                if (stopRequested) stopRecording();
+            } catch (err) {
+                console.error(err);
+                isRecording = false;
+                clearBusyUI('マイク権限が必要です。ブラウザの許可を確認してください。');
+            }
+        }
+
+        function stopRecording() {
+            if (!isRecording) return;
+            if (!mediaRecorder) {
+                stopRequested = true;
+                return;
+            }
+            try {
+                if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+            } catch (err) {
+                console.error(err);
+                isRecording = false;
+                clearBusyUI('エラー：録音停止に失敗しました');
+            }
+        }
+
+        async function sendAudioForCoaching(audioBlob) {
+            const targetPhrase = (targetPhraseEl?.innerText || '').trim();
+            transcriptText.textContent = '（文字起こし中…）';
+
+            const fd = new FormData();
+            const ext = (audioBlob.type || '').includes('ogg') ? 'ogg' : 'webm';
+            fd.append('audio', audioBlob, `recording.${ext}`);
+            fd.append('targetPhrase', targetPhrase);
+
+            const res = await fetch('/api/coach', { method: 'POST', body: fd });
+            if (!res.ok) {
+                const text = await res.text().catch(() => '');
+                throw new Error(`coach api failed: ${res.status} ${text}`);
+            }
+
+            const data = await res.json();
+            transcriptText.textContent = data.transcript || '（文字起こし結果なし）';
+
+            const scores = data?.scores || {};
+            const r = clampScore(scores.rhythm);
+            const v = clampScore(scores.vowel);
+            const b = clampScore(scores.british);
+            if (r != null) rhythmScoreEl.textContent = `${r}%`;
+            if (v != null) vowelScoreEl.textContent = `${v}%`;
+            if (b != null) britishScoreEl.textContent = `${b}%`;
+
+            renderFeedback(data);
+            renderDrill(data?.drill);
+        }
+
+        function bindTapToToggle(el) {
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!isRecording) {
+                    startRecording();
+                } else {
+                    stopRecording();
+                }
+            });
+        }
+
+        function bindHoldToRecord(el) {
+            el.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                el.setPointerCapture?.(e.pointerId);
+                startRecording();
+            });
+            el.addEventListener('pointerup', (e) => {
+                e.preventDefault();
+                stopRecording();
+            });
+            el.addEventListener('pointercancel', stopRecording);
+            el.addEventListener('pointerleave', (e) => {
+                if (e.buttons) stopRecording();
+            });
+            el.addEventListener('contextmenu', (e) => e.preventDefault());
+        }
+
+        if (!navigator.mediaDevices?.getUserMedia) {
+            statusText.textContent = 'このブラウザは録音に対応していません（Chrome推奨）';
+            recordBtn.disabled = true;
+            recordBtn.classList.add('opacity-60');
+        } else {
+            if (isTouchDevice()) {
+                statusText.textContent = 'タップで録音開始／もう一度タップで停止';
+                bindTapToToggle(recordBtn);
+            } else {
+                bindHoldToRecord(recordBtn);
+            }
+        }
+    </script>
+</body>
+</html>
